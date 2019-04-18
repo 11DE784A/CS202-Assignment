@@ -20,24 +20,30 @@ class Edge(tuple):
 
     __str__ = __repr__
 
+class Arc(tuple):
+    """
+    A directed Edge
+    """
+    def __new__(cls, v, w):
+        return tuple.__new__(cls, (v, w))
+
+    def __repr__(self):
+        return 'Edge(From %s to %s)' % (repr(self[0]), repr(self[1]))
+
 class Graph(dict):
     """Graph is a dictionary of dictionary.
     The first dictionary maps a vertex to an internal dictionary that maps
     its out neighbours to out edges connecting them"""
 
-    def __init__(self, vs = [], es = [], directed = False):
+    def __init__(self, vs = [], es = []):
         """
         Creates a new Graph
         @Args:
             vs: list of vertices
             es: list of edges
-            directed: a flag that tells if the graph is directed
         @Returns:
             None
         """
-        self.directed = directed
-        if self.directed:
-            self.reverse_graph = {}
 
         for v in vs:
             self.add_vertex(v)
@@ -47,7 +53,6 @@ class Graph(dict):
 
     def add_vertex(self, v):
         self[v] = {}
-        self.reverse_graph[v] = {}
 
     def add_edge(self, e):
         v, w = e
@@ -55,11 +60,7 @@ class Graph(dict):
             raise LoopError('An edge cannot exist from a vertex to itself')
 
         self[v][w] = e
-
-        if self.directed:
-            self.reverse_graph[w][v] = e
-        else:
-            self[w][v] = e
+        self[w][v] = e
 
     def get_edge(self, v, w):
         """
@@ -75,11 +76,7 @@ class Graph(dict):
     def remove_edge(self, e):
         v, w = e
         self[v].pop(w)
-
-        if self.directed:
-            self.reverse_graph[w].pop(v)
-        else:
-            self[w].pop(v)
+        self[w].pop(v)
 
     def vertices(self):
         """Returns a list of all vertices in the graph"""
@@ -109,31 +106,12 @@ class Graph(dict):
                 ns.append(w)
         return ns
 
-    def in_vertices(self, v):
-        """Returns a list of all in vertices of v"""
-
-        ns = []
-        for w in self.reverse_graph[v]:
-            if w not in ns:
-                ns.append(w)
-        return ns
-
     def out_edges(self, v):
         """Returns a list of all out edges of v"""
 
         es = []
         for w in self[v]:
             e = self[v][w]
-            if e not in es:
-                es.append(e)
-        return es
-
-    def in_edges(self, v):
-        """Returns a list of all in edges of v"""
-
-        es = []
-        for w in self.reverse_graph[v]:
-            e = self.reverse_graph[v][w]
             if e not in es:
                 es.append(e)
         return es
@@ -189,8 +167,7 @@ class Graph(dict):
 
     def traverse_depth_first(self):
         """
-        Wrapper around depth_first_visit to take care of directed,
-        unconnected graphs
+        Wrapper around depth_first_visit to take care of unconnected graphs
         """
 
         for v in self:
@@ -200,3 +177,60 @@ class Graph(dict):
         for v in self:
             if v.color == 'white':
                 self.depth_first_visit(v)
+
+class DirectedGraph(Graph):
+    def __init__(self, vs = [], es = []):
+        """
+        Creates a new directed graph
+        @Args:
+            vs: list of vertices
+            es: list of edges
+        @Returns:
+            None
+        """
+        self.reverse_graph = {}
+        for v in vs:
+            self.add_vertex(v)
+
+        for e in es:
+            self.add_edge(e)
+
+    def add_vertex(self, v):
+        self[v] = {}
+        self.reverse_graph[v] = {}
+
+    def add_arc(self, e):
+        v, w = e
+        if v == w:
+            raise LoopError('An edge cannot exist from a vertex to itself.')
+
+        self[v][w] = e
+        self.reverse_graph[w][v] = e
+
+    add_edge = add_arc
+
+    def remove_arc(self, e):
+        v, w = e
+        self[v].pop(w)
+        self.reverse_graph[w].pop(v)
+
+    remove_edge = remove_arc
+
+    def in_vertices(self, v):
+        """Returns a list of all in vertices of v"""
+
+        ns = []
+        for w in self.reverse_graph[v]:
+            if w not in ns:
+                ns.append(w)
+        return ns
+
+    def in_edges(self, v):
+        """Returns a list of all in edges of v"""
+
+        es = []
+        for w in self.reverse_graph[v]:
+            e = self.reverse_graph[v][w]
+            if e not in es:
+                es.append(e)
+        return es
