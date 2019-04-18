@@ -21,7 +21,24 @@ class Edge(tuple):
     __str__ = __repr__
 
 class Graph(dict):
-    def __init__(self, vs = [], es = []):
+    """Graph is a dictionary of dictionary.
+    The first dictionary maps a vertex to an internal dictionary that maps
+    its out neighbours to out edges connecting them"""
+
+    def __init__(self, vs = [], es = [], directed = False):
+        """
+        Creates a new Graph
+        @Args:
+            vs: list of vertices
+            es: list of edges
+            directed: a flag that tells if the graph is directed
+        @Returns:
+            None
+        """
+        self.directed = directed
+        if self.directed:
+            self.reverse_graph = {}
+
         for v in vs:
             self.add_vertex(v)
 
@@ -30,15 +47,25 @@ class Graph(dict):
 
     def add_vertex(self, v):
         self[v] = {}
+        self.reverse_graph[v] = {}
 
     def add_edge(self, e):
         v, w = e
+        if v == w:
+            raise LoopError('An edge cannot exist from a vertex to itself')
+
         self[v][w] = e
-        self[w][v] = e
+
+        if self.directed:
+            self.reverse_graph[w][v] = e
+        else:
+            self[w][v] = e
 
     def get_edge(self, v, w):
-        """Looks for an edge between `v` and `w` and returns it.
-        Returns `None` if there is no edge"""
+        """
+        Looks for an edge from v to w and returns it.
+        Returns None if there is no edge
+        """
 
         try:
             return self[v][w]
@@ -48,7 +75,11 @@ class Graph(dict):
     def remove_edge(self, e):
         v, w = e
         self[v].pop(w)
-        self[w].pop(v)
+
+        if self.directed:
+            self.reverse_graph[w].pop(v)
+        else:
+            self[w].pop(v)
 
     def vertices(self):
         """Returns a list of all vertices in the graph"""
@@ -70,7 +101,7 @@ class Graph(dict):
         return es
 
     def out_vertices(self, v):
-        """Returns a list of all vertices connected to `v` by an edge"""
+        """Returns a list of all out vertices of v"""
 
         ns = []
         for w in self[v]:
@@ -78,8 +109,17 @@ class Graph(dict):
                 ns.append(w)
         return ns
 
+    def in_vertices(self, v):
+        """Returns a list of all in vertices of v"""
+
+        ns = []
+        for w in self.reverse_graph[v]:
+            if w not in ns:
+                ns.append(w)
+        return ns
+
     def out_edges(self, v):
-        """Returns a list of all edges that connect `v` to other vertices"""
+        """Returns a list of all out edges of v"""
 
         es = []
         for w in self[v]:
@@ -88,10 +128,27 @@ class Graph(dict):
                 es.append(e)
         return es
 
+    def in_edges(self, v):
+        """Returns a list of all in edges of v"""
+
+        es = []
+        for w in self.reverse_graph[v]:
+            e = self.reverse_graph[v][w]
+            if e not in es:
+                es.append(e)
+        return es
+
     def degree(self, v):
         return len(self.out_edges(v))
 
     def traverse_breadth_first(self, s):
+        """
+        Does a breadth first traversal of the graph starting from s
+        @Args:
+            s: starting vertex
+        @Returns:
+            None
+        """
         for v in self:
             v.color = 'white'
             v.p = None
@@ -115,6 +172,13 @@ class Graph(dict):
             u.color = 'black'
 
     def depth_first_visit(self, v):
+        """
+        Does a depth first traversal of the graph starting from v
+        @Args:
+            v: starting vertex
+        @Returns: None
+        """
+
         v.color = 'grey'
         for u in self.out_vertices(v):
             if u.color == 'white':
@@ -124,6 +188,11 @@ class Graph(dict):
         v.color = 'black'
 
     def traverse_depth_first(self):
+        """
+        Wrapper around depth_first_visit to take care of directed,
+        unconnected graphs
+        """
+
         for v in self:
             v.color = 'white'
             v.p = None
