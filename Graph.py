@@ -12,23 +12,17 @@ class Vertex(object):
     __str__ = __repr__
 
 class Edge(tuple):
-    def __new__(cls, v, w):
+    def __new__(cls, v, w, directed = False):
+        cls.directed = directed
         return tuple.__new__(cls, (v, w))
 
     def __repr__(self):
-        return 'Edge(%s, %s)' % (repr(self[0]), repr(self[1]))
+        if self.directed:
+            return 'Edge(From %s to %s)' % (repr(self[0]), repr(self[1]))
+        if not self.directed:
+            return 'Edge(%s, %s)' % (repr(self[0]), repr(self[1]))
 
     __str__ = __repr__
-
-class Arc(tuple):
-    """
-    A directed Edge
-    """
-    def __new__(cls, v, w):
-        return tuple.__new__(cls, (v, w))
-
-    def __repr__(self):
-        return 'Edge(From %s to %s)' % (repr(self[0]), repr(self[1]))
 
 class Graph(dict):
     """Graph is a dictionary of dictionary.
@@ -199,22 +193,19 @@ class DirectedGraph(Graph):
         self[v] = {}
         self.reverse_graph[v] = {}
 
-    def add_arc(self, e):
+    def add_edge(self, e):
         v, w = e
         if v == w:
             raise LoopError('An edge cannot exist from a vertex to itself.')
 
+        e.directed = True
         self[v][w] = e
         self.reverse_graph[w][v] = e
 
-    add_edge = add_arc
-
-    def remove_arc(self, e):
+    def remove_edge(self, e):
         v, w = e
         self[v].pop(w)
         self.reverse_graph[w].pop(v)
-
-    remove_edge = remove_arc
 
     def in_vertices(self, v):
         """Returns a list of all in vertices of v"""

@@ -12,13 +12,17 @@ BFS and DFS, primarily.
 
 #### Usage Instructions
 Creating a new graph:
+
 ```
     >>> g = Graph()
 ```  
+
 for directed graphs:
+
 ```
     >>> g = DirectedGraph()
 ```  
+
 this initializes an empty graph, which is quite boring. Let's add some
 vertices! 
 
@@ -31,17 +35,16 @@ Create a couple of new vertices first:
 ```
 
 Create some edges between the vertices:
+
 ```
     >>> e1 = Edge(v, w)
     >>> e2 = Edge(v, x)
 ```
-or for a directed graph:
-```
-    >>> e1 = Arc(v, w)
-    >>> e2 = Arc(v, x)
-```
+For a directed graph these would create edges that go from `Vertex('v')` to
+`Vertex('w')` and from `Vertex('v')` to `Vertex('w')` respectively.
 
 Add the vertices and edges to the graph:
+
 ```
     >>> g.add_vertex(v)
     >>> g.add_vertex(w)
@@ -49,9 +52,12 @@ Add the vertices and edges to the graph:
     >>> g.add_edge(e1)
     >>> g.add_edge(e2)
 ```
-or initialize a new graph with the created vertices and edges:
+
+or just initialize a new graph with the created vertices and edges:
+
 ```
-    >>> h = Graph([v, w, x], [e1, e2])
+    >>> udh = Graph([v, w, x], [e1, e2])
+    >>> dh = DirectedGraph([v, w, x], [e1, e2])
 ```
 
 Detailed information for each Graph method is in docstrings where the methods
