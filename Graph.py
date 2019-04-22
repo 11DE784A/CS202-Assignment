@@ -113,7 +113,7 @@ class Graph(dict):
     def degree(self, v):
         return len(self.out_edges(v))
 
-    def traverse_breadth_first(self, s):
+    def bf_search(self, s):
         """
         Does a breadth first traversal of the graph starting from s
         @Args:
@@ -140,10 +140,10 @@ class Graph(dict):
                     w.p = u
                     q.enqueue(w)
 
-            print(u)
+            visit(u)
             u.color = 'black'
 
-    def depth_first_visit(self, v):
+    def df_visit(self, v):
         """
         Does a depth first traversal of the graph starting from v
         @Args:
@@ -155,11 +155,11 @@ class Graph(dict):
         for u in self.out_vertices(v):
             if u.color == 'white':
                 u.p = v
-                self.depth_first_visit(u)
-        print(v)
+                self.df_visit(u)
+        visit(v)
         v.color = 'black'
 
-    def traverse_depth_first(self):
+    def df_search(self):
         """
         Wrapper around depth_first_visit to take care of unconnected graphs
         """
@@ -170,7 +170,7 @@ class Graph(dict):
 
         for v in self:
             if v.color == 'white':
-                self.depth_first_visit(v)
+                self.df_visit(v)
 
 class DirectedGraph(Graph):
     def __init__(self, vs = [], es = []):
@@ -225,3 +225,7 @@ class DirectedGraph(Graph):
             if e not in es:
                 es.append(e)
         return es
+
+def visit(thing):
+    """Add stuff you want to do after getting to the vertex"""
+    print(thing)

@@ -1,25 +1,32 @@
-class Queue(list):
-    """Syntactic sugar around the inbuilt `list` data type to make it
-    look like a `Queue`. The methods should be self explanatory."""
+class Queue(object):
+    """A constant time Queue. Based on Raymond Hettinger's recipe:
+       https://github.com/ActiveState/code/
+       The methods should be self explanatory."""
 
-    def __init__(ls = []):
+    def __init__(self, ls = []):
         """
         Initializes a queue with elements from a list ls.
         @Args: the list ls
         @Returns: None
         """
+        self.next_in = 0
+        self.next_out = 0
+        self.data = {}
 
         for item in ls:
             self.enqueue(item)
 
     def size(self):
-        return len(self)
+        return len(self.data)
 
     def enqueue(self, element):
-        self.append(element)
+        self.data[self.next_in] = element
+        self.next_in += 1
 
     def dequeue(self):
-        return self.pop(0)
+        element = self.data.pop(self.next_out)
+        self.next_out += 1
+        return element
 
     def is_empty(self):
         if self.size() > 0:
